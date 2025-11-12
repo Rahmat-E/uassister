@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel - Restoran</title>
+  <script src="script.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9fafb;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #dc2626;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    header a {
+      color: white;
+      text-decoration: none;
+      background: #b91c1c;
+      padding: 8px 15px;
+      border-radius: 5px;
+    }
+
+    main { padding: 20px; }
+
+    h2 {
+      color: #b91c1c;
+      margin-bottom: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      margin-bottom: 30px;
+    }
+
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    table th {
+      background-color: #f87171;
+      color: white;
+    }
+
+    button {
+      background-color: #dc2626;
+      color: white;
+      border: none;
+      padding: 7px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 2px;
+    }
+
+    button:hover { background-color: #b91c1c; }
+
+    .form-container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 40px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .section { margin-bottom: 50px; }
+
+    footer {
+      text-align: center;
+      background: #fee2e2;
+      padding: 10px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🍽️ Admin Panel Restoran</h1>
+    <a href="login.html">Logout</a>
+  </header>
+
+  <main>
+    <!-- ========================== -->
+    <!-- SECTION MENU -->
+    <!-- ========================== -->
+    <div class="section">
+      <h2>Manajemen Menu</h2>
+
+      <div class="form-container">
+        <h3 id="formTitle">Tambah Menu Baru</h3>
+        <form id="formMenu" onsubmit="tambahMenu(event)">
+          <label>Nama Menu:</label>
+          <input type="text" id="nama_menu" required />
+
+          <label>Harga:</label>
+          <input type="number" id="harga" required />
+
+          <label>Kategori:</label>
+          <select id="kategori" required>
+            <option value="">Pilih kategori...</option>
+            <option value="Makanan">Makanan</option>
+            <option value="Minuman">Minuman</option>
+            <option value="Dessert">Dessert</option>
+          </select>
+
+          <label>Stok:</label>
+          <input type="number" id="stok" required />
+
+          <button type="submit" id="btnSubmit">Tambah Menu</button>
+        </form>
+      </div>
+
+      <table id="menuTable">
+        <tr>
+          <th>ID</th>
+          <th>Nama Menu</th>
+          <th>Harga</th>
+          <th>Kategori</th>
+          <th>Stok</th>
+          <th>Aksi</th>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ========================== -->
+    <!-- SECTION PELANGGAN -->
+    <!-- ========================== -->
+    <div class="section">
+      <h2>Manajemen Pelanggan</h2>
+      <table id="pelangganTable">
+        <tr>
+          <th>ID</th>
+          <th>Nama</th>
+          <th>Email</th>
+          <th>Telepon</th>
+          <th>Alamat</th>
+          <th>Aksi</th>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ========================== -->
+    <!-- SECTION PESANAN -->
+    <!-- ========================== -->
+    <div class="section">
+      <h2>Manajemen Pesanan</h2>
+      <table id="pesananTable">
+        <tr>
+          <th>ID Pesanan</th>
+          <th>Nama Pelanggan</th>
+          <th>Tanggal</th>
+          <th>Total Harga</th>
+          <th>Status</th>
+          <th>Aksi</th>
+        </tr>
+      </table>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Sistem Pemesanan Restoran - Admin Panel
+  </footer>
+
+  <script>
+    // const BASE_URL = "http://192.168.56.2/uas-rest/server/server.php/";
+    let editMode = false;
+    let editId = null;
+
+    // ============================== MENU ==============================
+    async function loadMenu() {
+      const menu = await getData("menu");
+      const table = document.getElementById("menuTable");
+      table.innerHTML = `
+        <tr><th>ID</th><th>Nama Menu</th><th>Harga</th><th>Kategori</th><th>Stok</th><th>Aksi</th></tr>
+      `;
+      menu.forEach(m => {
+        table.insertAdjacentHTML("beforeend", `
+          <tr>
+            <td>${m.id_menu}</td>
+            <td>${m.nama_menu}</td>
+            <td>Rp ${parseInt(m.harga).toLocaleString()}</td>
+            <td>${m.kategori}</td>
+            <td>${m.stok}</td>
+            <td>
+              <button onclick="editMenu(${m.id_menu}, '${m.nama_menu}', '${m.harga}', '${m.kategori}', '${m.stok}')">Ubah</button>
+              <button onclick="hapusMenu(${m.id_menu})">Hapus</button>
+            </td>
+          </tr>
+        `);
+      });
+    }
+
+    async function tambahMenu(e) {
+      e.preventDefault();
+      const data = {
+        nama_menu: nama_menu.value,
+        harga: harga.value,
+        kategori: kategori.value,
+        stok: stok.value
+      };
+
+      if (editMode) {
+        await putData(`menu?id_menu=${editId}`, data);
+        alert("Menu berhasil diupdate!");
+        document.getElementById("btnSubmit").textContent = "Tambah Menu";
+        document.getElementById("formTitle").textContent = "Tambah Menu Baru";
+        editMode = false;
+        editId = null;
+      } else {
+        await postData("menu", data);
+        alert("Menu berhasil ditambahkan!");
+      }
+
+      loadMenu();
+      e.target.reset();
+    }
+
+    function editMenu(id, nama, hargaVal, kategoriVal, stokVal) {
+      nama_menu.value = nama;
+      harga.value = hargaVal;
+      kategori.value = kategoriVal;
+      stok.value = stokVal;
+      document.getElementById("btnSubmit").textContent = "Update Menu";
+      document.getElementById("formTitle").textContent = "Ubah Menu";
+      editMode = true;
+      editId = id;
+    }
+
+    async function hapusMenu(id) {
+      if (!confirm("Hapus menu ini?")) return;
+      await deleteData(`menu?id_menu=${id}`);
+      loadMenu();
+    }
+
+    // ============================== PELANGGAN ==============================
+    async function loadPelanggan() {
+      const pelanggan = await getData("pelanggan");
+      const table = document.getElementById("pelangganTable");
+      table.innerHTML = `
+        <tr><th>ID</th><th>Nama</th><th>Email</th><th>Telepon</th><th>Alamat</th><th>Aksi</th></tr>
+      `;
+      pelanggan.forEach(p => {
+        table.insertAdjacentHTML("beforeend", `
+          <tr>
+            <td>${p.id_pelanggan}</td>
+            <td>${p.nama}</td>
+            <td>${p.email}</td>
+            <td>${p.telepon}</td>
+            <td>${p.alamat}</td>
+            <td><button onclick="hapusPelanggan(${p.id_pelanggan})">Hapus</button></td>
+          </tr>
+        `);
+      });
+    }
+
+    async function hapusPelanggan(id) {
+      if (!confirm("Hapus pelanggan ini?")) return;
+      await deleteData(`pelanggan?id_pelanggan=${id}`);
+      loadPelanggan();
+    }
+
+    // ============================== PESANAN ==============================
+    async function loadPesanan() {
+      const pesanan = await getData("pesanan");
+      const table = document.getElementById("pesananTable");
+      table.innerHTML = `
+        <tr><th>ID Pesanan</th><th>Nama Pelanggan</th><th>Tanggal</th><th>Total Harga</th><th>Status</th><th>Aksi</th></tr>
+      `;
+      pesanan.forEach(p => {
+  table.insertAdjacentHTML("beforeend", `
+    <tr>
+      <td>${p.id_pesanan}</td>
+      <td>${p.nama_pelanggan || "Tidak Diketahui"}</td>
+      <td>${p.tanggal_pesan || "-"}</td>
+      <td>Rp ${p.total_harga || "-"}</td>
+      <td>${p.status || "-"}</td>
+      <td>
+        <button onclick="window.location.href='crud.html?id_pesanan=${p.id_pesanan}&from=admin'">Ubah</button>
+        <button onclick="hapusPesanan(${p.id_pesanan})">Hapus</button>
+      </td>
+    </tr>
+  `);
+});
+
+    }
+
+    async function hapusPesanan(id) {
+      if (!confirm("Hapus pesanan ini?")) return;
+      await deleteData(`pesanan?id_pesanan=${id}`);
+      loadPesanan();
+    }
+    function ubahPesanan(id) {
+  // Arahkan ke halaman crud.html dengan id_pesanan
+  window.location.href = `crud.html?id_pesanan=${id}`;
+}
+
+
+    // ============================== INISIALISASI ==============================
+    loadMenu();
+    loadPelanggan();
+    loadPesanan();
+  </script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ubah Jumlah Pesanan</title>
+  <script src="script.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9fafb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .form-box {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      width: 350px;
+    }
+    h2 {
+      color: #b91c1c;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      margin-top: 5px;
+      text-align: center;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover { background: #b91c1c; }
+  </style>
+</head>
+<body>
+  <div class="form-box">
+    <h2>Ubah Jumlah Pesanan</h2>
+    <form id="editForm">
+      <label>Nama Menu</label>
+      <input type="text" id="nama_menu" readonly>
+
+      <label>Jumlah</label>
+      <input type="number" id="jumlah" min="1">
+
+      <label>Subtotal</label>
+      <input type="text" id="subtotal" readonly>
+
+      <button type="submit">Simpan</button>
+      <button type="button" onclick="window.location.href='index.html'">Batal</button>
+    </form>
+  </div>
+
+  <script>
+    // Pastikan user login
+    const user = getUser();
+    if (!user) {
+      alert("Silakan login dulu!");
+      window.location.href = "login.html";
+    }
+
+    // Ambil ID pesanan dari URL
+    const params = new URLSearchParams(window.location.search);
+    const id_pesanan = params.get("id_pesanan");
+
+    // Debug log agar kamu bisa lihat apakah ID-nya terbaca
+    console.log("id_pesanan:", id_pesanan);
+
+    // Load data pesanan pelanggan
+    async function loadPesanan() {
+      const data = await getData(`pesanan?id_pelanggan=${user.id_pelanggan}`);
+      console.log("Data pesanan:", data); // debug log
+
+      // Cari pesanan sesuai id_pesanan
+      const pesanan = data.find(p => p.id_pesanan == id_pesanan);
+      if (!pesanan) {
+        alert("Pesanan tidak ditemukan!");
+        window.location.href = "index.html";
+        return;
+      }
+
+      document.getElementById("nama_menu").value = pesanan.nama_menu;
+      document.getElementById("jumlah").value = pesanan.jumlah;
+      document.getElementById("subtotal").value = pesanan.subtotal;
+      document.getElementById("jumlah").dataset.harga = pesanan.subtotal / pesanan.jumlah;
+    }
+
+    // Saat ubah jumlah → update subtotal
+    document.getElementById("jumlah").addEventListener("input", function() {
+      const harga = parseFloat(this.dataset.harga);
+      const jumlah = parseInt(this.value);
+      document.getElementById("subtotal").value = harga * jumlah;
+    });
+
+    // Saat klik simpan
+    document.getElementById("editForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const jumlah = parseInt(document.getElementById("jumlah").value);
+      const subtotal = parseFloat(document.getElementById("subtotal").value);
+
+      console.log("Mengirim data:", { jumlah, subtotal }); // debug
+
+      try {
+        const result = await putData(`pesanan?id_pesanan=${id_pesanan}`, { jumlah, subtotal });
+        console.log("Respon:", result);
+
+        if (result.message) {
+          alert("Pesanan berhasil diupdate!");
+          // Ambil parameter 'from' dari URL
+const from = new URLSearchParams(window.location.search).get("from") || "index";
+window.location.href = from === "admin" ? "admin.html" : "index.html";
+
+        } else {
+          alert("Gagal mengupdate pesanan: " + (result.error || "Tidak diketahui"));
+        }
+      } catch (err) {
+        console.error("Error fetch:", err);
+        alert("Terjadi kesalahan saat menghubungi server.");
+      }
+    });
+
+    loadPesanan();
+  </script>
+</body>
+</html>

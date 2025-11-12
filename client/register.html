@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrasi Pelanggan</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f9fafb; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); width: 320px; }
+    input, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
+    button { background-color: #dc2626; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Registrasi Pelanggan</h2>
+    <input type="text" id="nama" placeholder="Nama" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="text" id="telepon" placeholder="Telepon" required>
+    <input type="text" id="alamat" placeholder="Alamat" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button onclick="register()">Daftar</button>
+    <p><a href="login.html">Sudah punya akun? Login</a></p>
+  </div>
+
+  <script>
+    async function register() {
+      const nama = document.getElementById("nama").value;
+      const email = document.getElementById("email").value;
+      const telepon = document.getElementById("telepon").value;
+      const alamat = document.getElementById("alamat").value;
+      const password = document.getElementById("password").value;
+
+      const data = {
+        nama: nama,
+        email: email,
+        telepon: telepon,
+        alamat: alamat,
+        password: password // ⚠️ penting: field ini harus sama dengan server.php
+      };
+
+      try {
+        const response = await fetch("http://192.168.56.2/uas-rest/server/server.php/pelanggan", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.message) {
+          alert("✅ Registrasi berhasil!");
+          window.location.href = "login.html";
+        } else {
+          alert("❌ Gagal: " + (result.error || "Terjadi kesalahan."));
+        }
+
+      } catch (error) {
+        alert("⚠️ Tidak dapat terhubung ke server.");
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>

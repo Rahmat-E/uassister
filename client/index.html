@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Pemesanan Makanan Restoran</title>
+  <script src="script.js"></script>
+
+<style>
+  body {
+    font-family: "Poppins", Arial, sans-serif;
+    margin: 0;
+    background-color: #f3efe0; /* Beige lembut */
+    color: #3f2e3e;
+  }
+
+  header {
+    background-color: #a27b5c; /* Warna kopi latte */
+    color: #fffdf6;
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  header h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  header button {
+    background-color: #7b5e57; /* Espresso */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s, transform 0.2s;
+  }
+
+  header button:hover {
+    background-color: #5c4033;
+    transform: scale(1.05);
+  }
+
+  main {
+    padding: 30px 25px;
+  }
+
+  h3 {
+    margin-top: 40px;
+    color: #7b5e57;
+    font-weight: 600;
+    border-left: 5px solid #c69b7b;
+    padding-left: 10px;
+    letter-spacing: 0.3px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fffdf8;
+    margin-top: 15px;
+    border: 1px solid #e0d3c3;
+    box-shadow: 0 2px 6px rgba(100, 70, 50, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  th, td {
+    border: 1px solid #eadccf;
+    padding: 12px;
+    text-align: center;
+  }
+
+  th {
+    background-color: #c69b7b; /* Caramel */
+    color: #fffdf6;
+    font-weight: 600;
+  }
+
+  tr:nth-child(even) td {
+    background-color: #fdf8f3;
+  }
+
+  tr:hover td {
+    background-color: #f8f1e4;
+    transition: background-color 0.2s ease;
+  }
+
+  td {
+    color: #3f2e3e;
+  }
+
+  button {
+    background-color: #a27b5c;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s, transform 0.2s;
+  }
+
+  button:hover {
+    background-color: #7b5e57;
+    transform: scale(1.05);
+  }
+
+  footer {
+    background: #e5d5c0;
+    text-align: center;
+    padding: 12px;
+    color: #4b2b16;
+    margin-top: 40px;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+    border-top: 2px solid #c69b7b;
+  }
+
+  .welcome {
+    font-size: 18px;
+    margin-bottom: 15px;
+    background: #fdf8f3;
+    padding: 12px 18px;
+    border-radius: 10px;
+    border-left: 6px solid #c69b7b;
+    color: #5c4033;
+  }
+
+  .welcome strong {
+    color: #7b5e57;
+  }
+
+  input[type="number"] {
+    width: 60px;
+    text-align: center;
+    border: 1px solid #d6b48f;
+    border-radius: 6px;
+    padding: 4px;
+    background: #fffaf3;
+    color: #3f2e3e;
+  }
+
+  input[type="number"]:focus {
+    outline: none;
+    border-color: #a27b5c;
+    box-shadow: 0 0 5px rgba(162, 123, 92, 0.4);
+  }
+
+  .status-menunggu {
+    color: #e67e22; /* orange terang */
+    font-weight: bold;
+  }
+  .status-diproses {
+    color: #3b82f6; /* biru kopi */
+    font-weight: bold;
+  }
+  .status-selesai {
+    color: #16a34a; /* hijau daun */
+    font-weight: bold;
+  }
+
+  button:active {
+    transform: scale(0.98);
+  }
+
+  footer:hover {
+    background-color: #e9d8c4;
+    transition: 0.3s;
+  }
+</style>
+
+
+
+
+</head>
+<body>
+  <header>
+    <h2>🍽️ Sistem Pemesanan Makanan Restoran</h2>
+    <button onclick="logout()">Logout</button>
+  </header>
+
+  <main>
+    <p class="welcome">Selamat Datang, <strong id="namaUser">User</strong> 👋</p>
+
+    <h3>Daftar Menu</h3>
+    <table id="menuTable">
+      <tr>
+        <th>Nama Menu</th>
+        <th>Harga</th>
+        <th>Kategori</th>
+        <th>Stok</th>
+        <th>jumlah</th>
+        <th>Aksi</th>
+      </tr>
+    </table>
+
+    <h3>Daftar Pesanan Saya</h3>
+    <table id="pesananTable">
+      <tr>
+        <th>Nama Menu</th>
+        <th>Jumlah</th>
+        <th>Subtotal</th>
+        <th>Status</th>
+        <th>Aksi</th>
+      </tr>
+    </table>
+  </main>
+
+  <footer>
+    © 2025 Sistem Pemesanan Restoran - RESTful API Project
+  </footer>
+
+<script>
+  const user = getUser();
+  if (!user) window.location.href = "login.html";
+  document.getElementById("namaUser").textContent = user.nama;
+
+  async function loadMenu() {
+    let menu = await getData("menu");
+    const table = document.getElementById("menuTable");
+
+    if (!Array.isArray(menu)) menu = Object.values(menu || {});
+    if (menu.length === 0) {
+      table.insertAdjacentHTML("beforeend", `<tr><td colspan="5">Belum ada menu</td></tr>`);
+      return;
+    }
+
+    menu.forEach(m => {
+  table.insertAdjacentHTML("beforeend", `
+    <tr>
+      <td>${m.nama_menu}</td>
+      <td>Rp ${parseInt(m.harga).toLocaleString()}</td>
+      <td>${m.kategori}</td>
+      <td>${m.stok}</td>
+      <td>
+        <input type="number" id="jumlah_${m.id_menu}" value="1" min="1" max="${m.stok}" 
+          style="width:60px; text-align:center; border:1px solid #ccc; border-radius:5px;">
+      </td>
+      <td>
+        <button onclick="pesan(${m.id_menu}, ${m.harga})">Pesan</button>
+      </td>
+    </tr>
+  `);
+});
+
+ }
+
+  // 🔹 Fungsi Pesan otomatis tambah jumlah
+  async function pesan(id_menu, harga) {
+  const jumlah = parseInt(document.getElementById(`jumlah_${id_menu}`).value);
+  if (!jumlah || jumlah <= 0) {
+    alert("Masukkan jumlah yang valid!");
+    return;
+  }
+
+  const total = harga * jumlah;
+  const data = {
+    id_pelanggan: user.id_pelanggan,
+    total_harga: total,
+    items: [{ id_menu, jumlah, subtotal: total }]
+  };
+
+  await postData("pesanan", data);
+  alert(`Berhasil memesan ${jumlah} item!`);
+  loadPesanan();
+}
+
+  // 🔹 Fungsi update pesanan (PUT)
+  async function updatePesanan(id, data) {
+    await putData(`pesanan/${id}`, data);
+  }
+
+  async function loadPesanan() {
+  let pesanan = await getData(`pesanan?id_pelanggan=${user.id_pelanggan}`);
+  const table = document.getElementById("pesananTable");
+  table.innerHTML = `
+    <tr>
+      <th>Nama Menu</th>
+      <th>Jumlah</th>
+      <th>Subtotal</th>
+      <th>Status</th>
+      <th>Aksi</th>
+    </tr>`;
+
+  if (!pesanan || pesanan.length === 0) {
+    table.insertAdjacentHTML("beforeend", `<tr><td colspan="5">Belum ada pesanan</td></tr>`);
+    return;
+  }
+
+  pesanan.forEach(p => {
+    let statusClass =
+      p.status === "Diproses" ? "status-diproses" :
+      p.status === "Selesai" ? "status-selesai" :
+      "status-menunggu";
+
+    table.insertAdjacentHTML("beforeend", `
+      <tr>
+        <td>${p.nama_menu}</td>
+        <td>${p.jumlah}</td>
+        <td>Rp ${parseInt(p.subtotal).toLocaleString()}</td>
+        <td class="${statusClass}">${p.status}</td>
+        <td>
+          <button onclick="window.location.href='crud.html?id_pesanan=${p.id_pesanan}&id_menu=${p.id_menu || 0}&from=index'">Ubah</button>
+          <button onclick="hapusPesanan(${p.id_pesanan})">Hapus</button>
+        </td>
+      </tr>
+    `);
+  });
+}
+
+async function ubahPesanan(id_pesanan, id_menu, jumlahLama, subtotalLama) {
+  const jumlahBaru = prompt("Masukkan jumlah baru:", jumlahLama);
+  if (!jumlahBaru || isNaN(jumlahBaru) || jumlahBaru <= 0) return;
+
+  const hargaSatuan = subtotalLama / jumlahLama;
+  const subtotalBaru = hargaSatuan * jumlahBaru;
+
+  const data = {
+    id_pesanan,
+    id_menu,
+    jumlah: jumlahBaru,
+    subtotal: subtotalBaru,
+    total_harga: subtotalBaru,
+    status: "Menunggu"
+  };
+
+  await putData(`pesanan/${id_pesanan}`, data);
+  alert("Jumlah pesanan berhasil diubah!");
+  loadPesanan();
+}
+
+async function hapusPesanan(id_pesanan) {
+  if (!confirm("Yakin ingin menghapus pesanan ini?")) return;
+  await deleteData(`pesanan?id_pesanan=${id_pesanan}`);
+  alert("Pesanan berhasil dihapus!");
+  loadPesanan();
+}
+
+
+
+
+  loadMenu();
+  loadPesanan();
+</script>
+
+</body>
+</html>
